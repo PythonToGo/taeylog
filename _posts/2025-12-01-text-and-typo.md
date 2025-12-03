@@ -166,7 +166,7 @@ $$ x = {-b \pm \sqrt{b^2-4ac} \over 2a} $$
 
 ### Default (with caption)
 
-![Desktop View](/posts/20190808/mockup.png){: width="972" height="589" }
+<!-- ![Desktop View](/posts/20190808/mockup.png){: width="972" height="589" }
 _Full screen width and center alignment_
 
 ### Left aligned
@@ -188,7 +188,7 @@ Praesent maximus aliquam sapien. Sed vel neque in dolor pulvinar auctor. Maecena
 The image below will toggle dark/light mode based on theme preference, notice it has shadows.
 
 ![light mode only](/posts/20190808/devtools-light.png){: .light .w-75 .shadow .rounded-10 w='1212' h='668' }
-![dark mode only](/posts/20190808/devtools-dark.png){: .dark .w-75 .shadow .rounded-10 w='1212' h='668' }
+![dark mode only](/posts/20190808/devtools-dark.png){: .dark .w-75 .shadow .rounded-10 w='1212' h='668' } -->
 
 ## Video
 

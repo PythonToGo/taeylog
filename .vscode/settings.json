@@ -4,7 +4,8 @@
   "editor.formatOnSave": true,
   // Shopify Liquid
   "files.associations": {
-    "*.html": "liquid"
+    "*.html": "liquid",
+    "**/assets/js/swconf.js": "liquid"
   },
   "[markdown]": {
     "editor.defaultFormatter": "yzhang.markdown-all-in-one"
