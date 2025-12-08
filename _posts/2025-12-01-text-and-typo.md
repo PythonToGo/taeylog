@@ -8,6 +8,7 @@ tags: [typography]
 pin: true
 math: true
 mermaid: true
+comments: true
 image: 
     path: /assets/img/posts/2025-12-02-test/hedge-test.png
     lqip: 
