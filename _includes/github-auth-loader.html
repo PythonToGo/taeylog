@@ -1,0 +1,25 @@
+{% comment %}
+  GitHub 인증 스크립트를 모든 페이지에 로드
+  이 파일은 head 또는 footer에 포함시켜야 합니다
+{% endcomment %}
+
+<script>
+  // GitHub OAuth 설정을 전역 변수로 설정
+  window.GITHUB_AUTH_CONFIG = {
+    clientId: '{{ site.github_auth.client_id }}',
+    redirectUri: '{{ site.url }}{{ site.baseurl }}/admin',
+    allowedUsername: '{{ site.github.username }}'
+  };
+  
+  // 인증 준비 완료 이벤트를 나중에 발생시키기 위한 플래그
+  window.GITHUB_AUTH_READY = false;
+</script>
+<script src="{{ '/assets/js/github-auth.js' | relative_url }}"></script>
+<script>
+  // GitHubAuth 인스턴스 생성 (설정 전달)
+  if (window.GITHUB_AUTH_CONFIG && !window.githubAuth) {
+    window.githubAuth = new GitHubAuth(window.GITHUB_AUTH_CONFIG);
+    window.GITHUB_AUTH_READY = true;
+    window.dispatchEvent(new CustomEvent('github-auth-ready'));
+  }
+</script>

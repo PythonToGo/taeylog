@@ -1,0 +1,90 @@
+{% comment %}
+  Chirpy 테마가 자동으로 로드하는 footer-custom.html
+  모든 페이지의 footer에 포함됩니다
+  포스트 페이지에 edit 버튼을 추가합니다
+{% endcomment %}
+
+{% if page.layout == 'post' %}
+<script>
+  // 포스트 페이지에 Edit 버튼을 동적으로 추가
+  (function() {
+    // Edit 버튼을 동적으로 생성하고 추가
+    function createEditButton() {
+      // 이미 버튼이 있으면 생성하지 않음
+      if (document.getElementById('post-edit-button-container')) {
+        return;
+      }
+
+      // 버튼 컨테이너 생성
+      const container = document.createElement('div');
+      container.id = 'post-edit-button-container';
+      container.className = 'post-edit-button admin-only';
+      container.style.cssText = 'display: none; margin-top: 2rem; margin-bottom: 2rem; text-align: center;';
+      
+      // Edit 버튼 생성
+      const editLink = document.createElement('a');
+      editLink.href = '/admin?edit={{ page.title | url_encode }}';
+      editLink.className = 'btn btn-sm btn-outline-primary';
+      editLink.style.textDecoration = 'none';
+      editLink.innerHTML = '<i class="fas fa-edit"></i> Edit Post';
+      
+      container.appendChild(editLink);
+
+      // 포스트 콘텐츠 영역 찾기 (Chirpy 테마의 일반적인 구조)
+      const postContent = document.querySelector('.post-content') || 
+                         document.querySelector('article') ||
+                         document.querySelector('main') ||
+                         document.querySelector('.page') ||
+                         document.body;
+      
+      if (postContent) {
+        postContent.appendChild(container);
+      }
+    }
+
+    // 인증 상태 확인 및 버튼 표시/숨김
+    function checkAuthAndShowButton() {
+      createEditButton();
+      const container = document.getElementById('post-edit-button-container');
+      if (!container) return;
+
+      if (window.githubAuth && window.githubAuth.isAuthenticated()) {
+        container.style.display = 'block';
+      } else {
+        container.style.display = 'none';
+      }
+    }
+
+    // 페이지 로드 후 실행
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(checkAuthAndShowButton, 100);
+      });
+    } else {
+      setTimeout(checkAuthAndShowButton, 100);
+    }
+
+    // githubAuth가 나중에 로드될 경우를 대비
+    if (window.GITHUB_AUTH_READY) {
+      setTimeout(checkAuthAndShowButton, 200);
+    } else {
+      window.addEventListener('github-auth-ready', () => {
+        setTimeout(checkAuthAndShowButton, 100);
+      });
+    }
+    
+    // 인증 성공 이벤트 리스너
+    window.addEventListener('github-auth-success', () => {
+      checkAuthAndShowButton();
+    });
+    
+    // 로그아웃 이벤트 리스너
+    window.addEventListener('github-auth-logout', () => {
+      const container = document.getElementById('post-edit-button-container');
+      if (container) {
+        container.style.display = 'none';
+      }
+    });
+  })();
+</script>
+{% endif %}
