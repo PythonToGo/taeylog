@@ -28,12 +28,6 @@ url: "https://pythontogo.github.io"
 github:
   username: PythonToGo # change to your GitHub username
 
-# GitHub OAuth App 설정
-# GitHub에서 OAuth App을 생성하고 client_id를 설정하세요
-# https://github.com/settings/developers 에서 생성 가능
-github_auth:
-  client_id: Ov23li2X6YZz9MznUCVO
-
 linkedin:
   username: taeyoungkimtaey # change to your LinkedIn username
 
