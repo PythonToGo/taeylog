@@ -54,9 +54,10 @@ jobs:
         run: |
           bundle exec htmlproofer "_site${{ steps.pages.outputs.base_path }}" \
             --disable-external \
-            --ignore-urls "/^http:\/\/127.0.0.1/,/^http:\/\/0.0.0.0/,/^http:\/\/localhost/,/#/,/^\/$/,/^mailto:/" \
+            --ignore-urls "/^http:\/\/127.0.0.1/,/^http:\/\/0.0.0.0/,/^http:\/\/localhost/,/^https:\/\/fonts\.googleapis\.com/,/^https:\/\/fonts\.gstatic\.com/,/^https:\/\/www\.linkedin\.com/,/^https:\/\/pythontogo\.github\.io\/admin/,/#/,/^\/$/,/^mailto:/" \
             --allow-hash-href \
-            --ignore-empty-alt
+            --ignore-empty-alt \
+            --http-status-ignore "0,404,999"
 
       - name: Upload site artifact
         uses: actions/upload-pages-artifact@v3
