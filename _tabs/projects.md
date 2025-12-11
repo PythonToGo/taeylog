@@ -72,60 +72,102 @@ order: 2
 
 <script>
 (function() {
-  let retryCount = 0;
-  const maxRetries = 50;
-  let initialized = false;
-  let eventListenerAttached = false;
+  'use strict';
   
-  function initProjectFilters() {
-    // 중복 실행 방지
-    if (initialized) {
+  let initialized = false;
+  let buttonsCreated = false;
+  
+  function normalizeTag(tag) {
+    return tag.replace(/\s+/g, '-').replace(/\//g, '-').toLowerCase().trim();
+  }
+  
+  function applyFilter(filter) {
+    const allProjectCards = document.querySelectorAll('.project-card');
+    const allFilterButtons = document.querySelectorAll('.filter-btn');
+    
+    // Update active button
+    allFilterButtons.forEach(btn => {
+      btn.classList.remove('active', 'btn-primary');
+      btn.classList.add('btn-outline-primary');
+    });
+    
+    const activeButton = Array.from(allFilterButtons).find(btn => 
+      btn.getAttribute('data-filter') === filter
+    );
+    if (activeButton) {
+      activeButton.classList.add('active', 'btn-primary');
+      activeButton.classList.remove('btn-outline-primary');
+    }
+    
+    // Filter cards with animation
+    allProjectCards.forEach(card => {
+      if (filter === 'all') {
+        card.style.display = '';
+        card.style.opacity = '1';
+      } else {
+        const cardTags = card.getAttribute('data-tags');
+        if (cardTags) {
+          const tagArray = cardTags.split(',').map(t => t.trim());
+          if (tagArray.includes(filter)) {
+            card.style.display = '';
+            card.style.opacity = '1';
+          } else {
+            card.style.opacity = '0';
+            setTimeout(() => {
+              card.style.display = 'none';
+            }, 200);
+          }
+        } else {
+          card.style.opacity = '0';
+          setTimeout(() => {
+            card.style.display = 'none';
+          }, 200);
+        }
+      }
+    });
+  }
+  
+  function createFilterButtons() {
+    if (buttonsCreated) {
       return;
     }
     
-    // Collect all unique tags from project cards
-    const projectCards = document.querySelectorAll('.project-card');
-    const tagMap = new Map(); // normalized tag -> original tag
     const filterContainer = document.getElementById('filter-buttons');
-    
-    // retry
-    if (projectCards.length === 0 || !filterContainer) {
-      retryCount++;
-      if (retryCount < maxRetries) {
-        setTimeout(initProjectFilters, 100);
-        return;
-      }
-      if (!filterContainer) {
-        return;
-      }
+    if (!filterContainer) {
+      return;
     }
     
-    // Prevent duplicate creation if filter buttons already exist
+    // Check if buttons already exist (except "All" button)
     const existingButtons = filterContainer.querySelectorAll('.filter-btn');
     if (existingButtons.length > 1) {
-      initialized = true;
-      attachEventListener();
+      buttonsCreated = true;
       return;
     }
     
+    const projectCards = document.querySelectorAll('.project-card');
+    if (projectCards.length === 0) {
+      return;
+    }
+    
+    const tagMap = new Map();
+    
+    // Collect all unique tags
     projectCards.forEach(card => {
       const normalizedTags = card.getAttribute('data-tags');
       const originalTags = card.getAttribute('data-tags-original');
       if (normalizedTags && originalTags) {
-        const normalizedArray = normalizedTags.split(',');
-        const originalArray = originalTags.split(',');
+        const normalizedArray = normalizedTags.split(',').map(t => t.trim());
+        const originalArray = originalTags.split(',').map(t => t.trim());
         normalizedArray.forEach((normTag, index) => {
-          const trimmed = normTag.trim();
-          if (trimmed && !tagMap.has(trimmed)) {
-            tagMap.set(trimmed, originalArray[index] ? originalArray[index].trim() : trimmed);
+          if (normTag && !tagMap.has(normTag)) {
+            tagMap.set(normTag, originalArray[index] || normTag);
           }
         });
       }
     });
     
-    // Create filter buttons for each tag
+    // Create filter buttons
     const sortedTags = Array.from(tagMap.keys()).sort();
-    
     sortedTags.forEach(normalizedTag => {
       const button = document.createElement('button');
       button.className = 'btn btn-sm btn-outline-primary filter-btn';
@@ -135,83 +177,113 @@ order: 2
       filterContainer.appendChild(button);
     });
     
-    // Use event delegation so that dynamically added buttons also work
-    attachEventListener();
-    
-    initialized = true;
+    buttonsCreated = true;
   }
   
-  function attachEventListener() {
-    if (eventListenerAttached) {
-      return;
-    }
-    
+  function attachEventListeners() {
     const filterContainer = document.getElementById('filter-buttons');
     if (!filterContainer) {
       return;
     }
     
-    // Event delegation
+    // Event delegation for filter buttons
     filterContainer.addEventListener('click', function(e) {
       const target = e.target;
       if (target && target.classList.contains('filter-btn')) {
         const filter = target.getAttribute('data-filter');
-        const allProjectCards = document.querySelectorAll('.project-card');
-        const allFilterButtons = document.querySelectorAll('.filter-btn');
-        
-        // Update active button
-        allFilterButtons.forEach(btn => {
-          btn.classList.remove('active');
-          btn.classList.remove('btn-primary');
-          btn.classList.add('btn-outline-primary');
-        });
-        target.classList.add('active');
-        target.classList.remove('btn-outline-primary');
-        target.classList.add('btn-primary');
-        
-        // Filter cards with animation
-        allProjectCards.forEach(card => {
-          if (filter === 'all') {
-            card.style.display = '';
-            setTimeout(() => {
-              card.style.opacity = '1';
-            }, 10);
-          } else {
-            const cardTags = card.getAttribute('data-tags');
-            if (cardTags && cardTags.split(',').map(t => t.trim()).includes(filter)) {
-              card.style.display = '';
-              setTimeout(() => {
-                card.style.opacity = '1';
-              }, 10);
-            } else {
-              card.style.opacity = '0';
-              setTimeout(() => {
-                card.style.display = 'none';
-              }, 200);
-            }
-          }
-        });
+        if (filter) {
+          applyFilter(filter);
+        }
       }
     });
     
-    eventListenerAttached = true;
+    // Make badge tags clickable for filtering
+    const projectCards = document.querySelectorAll('.project-card');
+    projectCards.forEach(card => {
+      const badges = card.querySelectorAll('.badge-primary');
+      badges.forEach(badge => {
+        if (!badge.hasAttribute('data-filter-attached')) {
+          badge.style.cursor = 'pointer';
+          badge.setAttribute('data-filter-attached', 'true');
+          badge.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const tagText = this.textContent.trim();
+            const normalizedTag = normalizeTag(tagText);
+            
+            // Find and click the corresponding filter button
+            const filterButton = Array.from(document.querySelectorAll('.filter-btn')).find(btn => 
+              btn.getAttribute('data-filter') === normalizedTag
+            );
+            if (filterButton) {
+              filterButton.click();
+            }
+          });
+        }
+      });
+    });
   }
   
-  function startInit() {
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', function() {
-        setTimeout(initProjectFilters, 200);
-      });
-    } else if (document.readyState === 'interactive') {
-      setTimeout(initProjectFilters, 200);
-    } else {
-
-      setTimeout(initProjectFilters, 200);
+  function initProjectFilters() {
+    if (initialized) {
+      return;
     }
     
+    const filterContainer = document.getElementById('filter-buttons');
+    const projectCards = document.querySelectorAll('.project-card');
+    
+    if (!filterContainer || projectCards.length === 0) {
+      return;
+    }
+    
+    createFilterButtons();
+    attachEventListeners();
+    initialized = true;
+  }
+  
+  // Multiple initialization strategies
+  function startInit() {
+    // Strategy 1: DOMContentLoaded
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(initProjectFilters, 300);
+      });
+    } else {
+      setTimeout(initProjectFilters, 300);
+    }
+    
+    // Strategy 2: window.load
     window.addEventListener('load', function() {
-      setTimeout(initProjectFilters, 100);
+      setTimeout(initProjectFilters, 200);
     });
+    
+    // Strategy 3: MutationObserver for dynamic content
+    if (typeof MutationObserver !== 'undefined') {
+      const observer = new MutationObserver(function(mutations) {
+        const filterContainer = document.getElementById('filter-buttons');
+        const projectCards = document.querySelectorAll('.project-card');
+        if (filterContainer && projectCards.length > 0 && !initialized) {
+          setTimeout(initProjectFilters, 100);
+        }
+      });
+      
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true
+      });
+      
+      // Cleanup after 10 seconds
+      setTimeout(function() {
+        observer.disconnect();
+      }, 10000);
+    }
+    
+    // Strategy 4: Fallback with longer delay
+    setTimeout(function() {
+      if (!initialized) {
+        initProjectFilters();
+      }
+    }, 1000);
   }
   
   startInit();
