@@ -72,14 +72,39 @@ order: 2
 
 <script>
 (function() {
+  let retryCount = 0;
+  const maxRetries = 50;
+  let initialized = false;
+  let eventListenerAttached = false;
+  
   function initProjectFilters() {
+    // 중복 실행 방지
+    if (initialized) {
+      return;
+    }
+    
     // Collect all unique tags from project cards
     const projectCards = document.querySelectorAll('.project-card');
     const tagMap = new Map(); // normalized tag -> original tag
+    const filterContainer = document.getElementById('filter-buttons');
     
-    if (projectCards.length === 0) {
-      // If cards aren't loaded yet, try again after a short delay
-      setTimeout(initProjectFilters, 100);
+    // retry
+    if (projectCards.length === 0 || !filterContainer) {
+      retryCount++;
+      if (retryCount < maxRetries) {
+        setTimeout(initProjectFilters, 100);
+        return;
+      }
+      if (!filterContainer) {
+        return;
+      }
+    }
+    
+    // Prevent duplicate creation if filter buttons already exist
+    const existingButtons = filterContainer.querySelectorAll('.filter-btn');
+    if (existingButtons.length > 1) {
+      initialized = true;
+      attachEventListener();
       return;
     }
     
@@ -99,12 +124,6 @@ order: 2
     });
     
     // Create filter buttons for each tag
-    const filterContainer = document.getElementById('filter-buttons');
-    if (!filterContainer) {
-      setTimeout(initProjectFilters, 100);
-      return;
-    }
-    
     const sortedTags = Array.from(tagMap.keys()).sort();
     
     sortedTags.forEach(normalizedTag => {
@@ -116,25 +135,42 @@ order: 2
       filterContainer.appendChild(button);
     });
     
-    // Filter functionality
-    const filterButtons = document.querySelectorAll('.filter-btn');
+    // Use event delegation so that dynamically added buttons also work
+    attachEventListener();
     
-    filterButtons.forEach(button => {
-      button.addEventListener('click', function() {
-        const filter = this.getAttribute('data-filter');
+    initialized = true;
+  }
+  
+  function attachEventListener() {
+    if (eventListenerAttached) {
+      return;
+    }
+    
+    const filterContainer = document.getElementById('filter-buttons');
+    if (!filterContainer) {
+      return;
+    }
+    
+    // Event delegation
+    filterContainer.addEventListener('click', function(e) {
+      const target = e.target;
+      if (target && target.classList.contains('filter-btn')) {
+        const filter = target.getAttribute('data-filter');
+        const allProjectCards = document.querySelectorAll('.project-card');
+        const allFilterButtons = document.querySelectorAll('.filter-btn');
         
         // Update active button
-        filterButtons.forEach(btn => {
+        allFilterButtons.forEach(btn => {
           btn.classList.remove('active');
           btn.classList.remove('btn-primary');
           btn.classList.add('btn-outline-primary');
         });
-        this.classList.add('active');
-        this.classList.remove('btn-outline-primary');
-        this.classList.add('btn-primary');
+        target.classList.add('active');
+        target.classList.remove('btn-outline-primary');
+        target.classList.add('btn-primary');
         
         // Filter cards with animation
-        projectCards.forEach(card => {
+        allProjectCards.forEach(card => {
           if (filter === 'all') {
             card.style.display = '';
             setTimeout(() => {
@@ -142,7 +178,7 @@ order: 2
             }, 10);
           } else {
             const cardTags = card.getAttribute('data-tags');
-            if (cardTags && cardTags.split(',').includes(filter)) {
+            if (cardTags && cardTags.split(',').map(t => t.trim()).includes(filter)) {
               card.style.display = '';
               setTimeout(() => {
                 card.style.opacity = '1';
@@ -155,19 +191,29 @@ order: 2
             }
           }
         });
+      }
+    });
+    
+    eventListenerAttached = true;
+  }
+  
+  function startInit() {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(initProjectFilters, 200);
       });
+    } else if (document.readyState === 'interactive') {
+      setTimeout(initProjectFilters, 200);
+    } else {
+
+      setTimeout(initProjectFilters, 200);
+    }
+    
+    window.addEventListener('load', function() {
+      setTimeout(initProjectFilters, 100);
     });
   }
   
-  // Wait for DOM to be fully loaded
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function() {
-      // Add a small delay to ensure all content is rendered
-      setTimeout(initProjectFilters, 100);
-    });
-  } else {
-    // DOM is already loaded
-    setTimeout(initProjectFilters, 100);
-  }
+  startInit();
 })();
 </script>
