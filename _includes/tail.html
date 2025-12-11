@@ -8,9 +8,14 @@
     "use strict";
 
     let refreshing = false;
+    let updateHandlerAttached = false;
 
     // Update 버튼 클릭 핸들러 설정
     function setupUpdateButton() {
+      if (updateHandlerAttached) {
+        return;
+      }
+
       const notification = document.getElementById("notification");
       if (!notification) {
         return;
@@ -19,62 +24,97 @@
       const updateButton = notification.querySelector(
         'button.btn-primary[aria-label="Update"]'
       );
-      if (updateButton && !updateButton.hasAttribute("data-update-handler")) {
-        updateButton.setAttribute("data-update-handler", "true");
-        updateButton.addEventListener("click", function (e) {
-          e.preventDefault();
-          e.stopPropagation();
 
-          if (refreshing) {
-            return;
-          }
+      if (!updateButton) {
+        return;
+      }
 
-          refreshing = true;
+      // 이미 핸들러가 있으면 중복 방지
+      if (updateButton.hasAttribute("data-update-handler")) {
+        updateHandlerAttached = true;
+        return;
+      }
 
-          // 서비스 워커에 SKIP_WAITING 메시지 전송
-          if ("serviceWorker" in navigator) {
-            navigator.serviceWorker
-              .getRegistration()
-              .then(function (registration) {
-                if (registration && registration.waiting) {
-                  // 서비스 워커는 "SKIP_WAITING" 문자열을 직접 받음
+      updateButton.setAttribute("data-update-handler", "true");
+
+      updateButton.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (refreshing) {
+          return;
+        }
+
+        refreshing = true;
+        updateButton.disabled = true;
+        updateButton.textContent = "Updating...";
+
+        // 서비스 워커에 SKIP_WAITING 메시지 전송
+        if ("serviceWorker" in navigator) {
+          navigator.serviceWorker
+            .getRegistration()
+            .then(function (registration) {
+              if (registration) {
+                // waiting 서비스 워커가 있으면 메시지 전송
+                if (registration.waiting) {
                   registration.waiting.postMessage("SKIP_WAITING");
                 }
 
-                // 알림 닫기 (Bootstrap Toast가 있으면 사용, 없으면 직접 숨김)
+                // installing 서비스 워커가 있으면 기다림
+                if (registration.installing) {
+                  registration.installing.addEventListener(
+                    "statechange",
+                    function () {
+                      if (
+                        this.state === "installed" &&
+                        navigator.serviceWorker.controller
+                      ) {
+                        this.postMessage("SKIP_WAITING");
+                      }
+                    }
+                  );
+                }
+              }
+
+              // 알림 닫기
+              try {
                 if (typeof bootstrap !== "undefined" && bootstrap.Toast) {
                   const toast = bootstrap.Toast.getInstance(notification);
                   if (toast) {
                     toast.hide();
                   } else {
-                    notification.classList.add("d-none");
+                    notification.style.display = "none";
                   }
                 } else {
-                  notification.classList.add("d-none");
+                  notification.style.display = "none";
                 }
+              } catch (e) {
+                notification.style.display = "none";
+              }
 
-                // 페이지 새로고침
-                setTimeout(function () {
-                  window.location.reload();
-                }, 300);
-              })
-              .catch(function (error) {
-                console.error("Service worker update error:", error);
-                // 에러 발생 시에도 새로고침
-                notification.classList.add("d-none");
-                setTimeout(function () {
-                  window.location.reload();
-                }, 300);
-              });
-          } else {
-            // 서비스 워커가 지원되지 않으면 그냥 새로고침
-            notification.classList.add("d-none");
-            setTimeout(function () {
-              window.location.reload();
-            }, 300);
-          }
-        });
-      }
+              // 페이지 새로고침
+              setTimeout(function () {
+                window.location.reload(true);
+              }, 500);
+            })
+            .catch(function (error) {
+              console.error("Service worker update error:", error);
+              // 에러 발생 시에도 새로고침
+              notification.style.display = "none";
+              setTimeout(function () {
+                window.location.reload(true);
+              }, 500);
+            });
+        } else {
+          // 서비스 워커가 지원되지 않으면 그냥 새로고침
+          notification.style.display = "none";
+          setTimeout(function () {
+            window.location.reload(true);
+          }, 500);
+        }
+      });
+
+      updateHandlerAttached = true;
     }
 
     // 서비스 워커 컨트롤러 변경 감지
@@ -82,7 +122,7 @@
       navigator.serviceWorker.addEventListener("controllerchange", function () {
         if (!refreshing) {
           refreshing = true;
-          window.location.reload();
+          window.location.reload(true);
         }
       });
     }
@@ -95,24 +135,43 @@
       // DOMContentLoaded 후 실행
       if (document.readyState === "loading") {
         document.addEventListener("DOMContentLoaded", function () {
-          setTimeout(setupUpdateButton, 500);
+          setTimeout(setupUpdateButton, 300);
         });
       } else {
-        setTimeout(setupUpdateButton, 500);
+        setTimeout(setupUpdateButton, 300);
       }
 
       // window.load 후 실행
       window.addEventListener("load", function () {
-        setTimeout(setupUpdateButton, 1000);
+        setTimeout(setupUpdateButton, 500);
       });
 
-      // 주기적으로 확인 (동적으로 추가될 수 있음)
-      const checkInterval = setInterval(function () {
-        setupUpdateButton();
-        // 10초 후에는 중지
+      // MutationObserver로 동적 추가 감지
+      if (typeof MutationObserver !== "undefined") {
+        const observer = new MutationObserver(function () {
+          if (!updateHandlerAttached) {
+            setupUpdateButton();
+          }
+        });
+
+        observer.observe(document.body, {
+          childList: true,
+          subtree: true,
+        });
+
         setTimeout(function () {
-          clearInterval(checkInterval);
+          observer.disconnect();
         }, 10000);
+      }
+
+      // 주기적으로 확인 (최대 5초)
+      let checkCount = 0;
+      const checkInterval = setInterval(function () {
+        checkCount++;
+        setupUpdateButton();
+        if (checkCount >= 10 || updateHandlerAttached) {
+          clearInterval(checkInterval);
+        }
       }, 500);
     }
 

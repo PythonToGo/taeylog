@@ -76,6 +76,7 @@ order: 2
   
   let initialized = false;
   let buttonsCreated = false;
+  let eventDelegationAttached = false;
   
   function normalizeTag(tag) {
     return tag.replace(/\s+/g, '-').replace(/\//g, '-').toLowerCase().trim();
@@ -134,19 +135,19 @@ order: 2
     
     const filterContainer = document.getElementById('filter-buttons');
     if (!filterContainer) {
-      return;
+      return false;
     }
     
     // Check if buttons already exist (except "All" button)
     const existingButtons = filterContainer.querySelectorAll('.filter-btn');
     if (existingButtons.length > 1) {
       buttonsCreated = true;
-      return;
+      return true;
     }
     
     const projectCards = document.querySelectorAll('.project-card');
     if (projectCards.length === 0) {
-      return;
+      return false;
     }
     
     const tagMap = new Map();
@@ -178,6 +179,7 @@ order: 2
     });
     
     buttonsCreated = true;
+    return true;
   }
   
   function attachEventListeners() {
@@ -186,16 +188,19 @@ order: 2
       return;
     }
     
-    // Event delegation for filter buttons
-    filterContainer.addEventListener('click', function(e) {
-      const target = e.target;
-      if (target && target.classList.contains('filter-btn')) {
-        const filter = target.getAttribute('data-filter');
-        if (filter) {
-          applyFilter(filter);
+    // Event delegation for filter buttons (한 번만 등록)
+    if (!eventDelegationAttached) {
+      filterContainer.addEventListener('click', function(e) {
+        const target = e.target;
+        if (target && target.classList.contains('filter-btn')) {
+          const filter = target.getAttribute('data-filter');
+          if (filter) {
+            applyFilter(filter);
+          }
         }
-      }
-    });
+      });
+      eventDelegationAttached = true;
+    }
     
     // Make badge tags clickable for filtering
     const projectCards = document.querySelectorAll('.project-card');
@@ -217,6 +222,9 @@ order: 2
             );
             if (filterButton) {
               filterButton.click();
+            } else {
+              // 버튼이 아직 생성되지 않았으면 직접 필터 적용
+              applyFilter(normalizedTag);
             }
           });
         }
@@ -233,37 +241,58 @@ order: 2
     const projectCards = document.querySelectorAll('.project-card');
     
     if (!filterContainer || projectCards.length === 0) {
-      return;
+      return false;
     }
     
-    createFilterButtons();
-    attachEventListeners();
-    initialized = true;
+    const buttonsCreated = createFilterButtons();
+    if (buttonsCreated) {
+      attachEventListeners();
+      initialized = true;
+      return true;
+    }
+    
+    return false;
   }
   
-  // Multiple initialization strategies
+  // 강력한 초기화 전략
   function startInit() {
-    // Strategy 1: DOMContentLoaded
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', function() {
-        setTimeout(initProjectFilters, 300);
-      });
-    } else {
-      setTimeout(initProjectFilters, 300);
+    let retryCount = 0;
+    const maxRetries = 20;
+    
+    function tryInit() {
+      if (initProjectFilters()) {
+        return true;
+      }
+      
+      retryCount++;
+      if (retryCount < maxRetries) {
+        setTimeout(tryInit, 200);
+      }
+      return false;
     }
     
-    // Strategy 2: window.load
+    // Strategy 1: 즉시 시도
+    tryInit();
+    
+    // Strategy 2: DOMContentLoaded
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(tryInit, 100);
+      });
+    } else {
+      setTimeout(tryInit, 100);
+    }
+    
+    // Strategy 3: window.load
     window.addEventListener('load', function() {
-      setTimeout(initProjectFilters, 200);
+      setTimeout(tryInit, 200);
     });
     
-    // Strategy 3: MutationObserver for dynamic content
+    // Strategy 4: MutationObserver
     if (typeof MutationObserver !== 'undefined') {
-      const observer = new MutationObserver(function(mutations) {
-        const filterContainer = document.getElementById('filter-buttons');
-        const projectCards = document.querySelectorAll('.project-card');
-        if (filterContainer && projectCards.length > 0 && !initialized) {
-          setTimeout(initProjectFilters, 100);
+      const observer = new MutationObserver(function() {
+        if (!initialized) {
+          tryInit();
         }
       });
       
@@ -272,18 +301,17 @@ order: 2
         subtree: true
       });
       
-      // Cleanup after 10 seconds
       setTimeout(function() {
         observer.disconnect();
-      }, 10000);
+      }, 15000);
     }
     
-    // Strategy 4: Fallback with longer delay
+    // Strategy 5: 최종 fallback
     setTimeout(function() {
       if (!initialized) {
-        initProjectFilters();
+        tryInit();
       }
-    }, 1000);
+    }, 2000);
   }
   
   startInit();
