@@ -77,7 +77,7 @@
 
         {% assign sorted_parents = parent_cats | split: '|' | sort %}
         {% for parent_cat in sorted_parents %}
-          {% assign category_path = '/categories/' | append: parent_cat | append: '/' %}
+          {% assign category_path = '/categories/' | append: parent_cat | downcase | append: '/' %}
           <li class="nav-item category-sub{% if page.url == category_path %}{{ " active" }}{% endif %}">
             <a href="{{ category_path | relative_url }}" class="nav-link">
               <i class="fa-fw fas fa-folder"></i>
@@ -104,7 +104,7 @@
             {% if parent_children != '' %}
               {% assign sorted_children = parent_children | split: '|' | sort %}
               {% for child_cat in sorted_children %}
-                {% assign child_path = '/categories/' | append: child_cat | append: '/' %}
+                {% assign child_path = '/categories/' | append: child_cat | downcase | append: '/' %}
                 <li class="nav-item category-sub-sub{% if page.url == child_path %}{{ " active" }}{% endif %}">
                   <a href="{{ child_path | relative_url }}" class="nav-link">
                     <i class="fa-fw fas fa-folder-open"></i>

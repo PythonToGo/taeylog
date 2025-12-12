@@ -28,7 +28,7 @@ layout: page
     <div class="d-flex flex-wrap gap-2">
       {% assign subcat_list = subcategories | split: '|' | sort %} {% for subcat
       in subcat_list %} {% assign subcat_path = '/categories/' | append: subcat
-      | append: '/' %}
+      | downcase | append: '/' %}
       <a
         href="{{ subcat_path | relative_url }}"
         class="btn btn-sm btn-outline-primary"
