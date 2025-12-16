@@ -77,3 +77,28 @@
   background-color: #0b5ed7;
   border-color: #0a58ca;
 }
+
+/* Projects badges - ensure Bootstrap 5 compatibility */
+.project-card .badge {
+  display: inline-block;
+  padding: 0.35em 0.65em;
+  font-size: 0.875em;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  border-radius: 0.25rem;
+}
+
+.project-card .badge.bg-primary,
+.project-card .badge.badge-primary {
+  background-color: #007bff !important;
+  color: #fff !important;
+}
+
+.project-card .badge.bg-info,
+.project-card .badge.badge-info {
+  background-color: #17a2b8 !important;
+  color: #fff !important;
+}

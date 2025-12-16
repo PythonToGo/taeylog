@@ -142,11 +142,19 @@
     // Make badge tags clickable for filtering
     const projectCards = document.querySelectorAll('.project-card');
     projectCards.forEach(function(card) {
-      const badges = card.querySelectorAll('.badge-primary');
+      // Select both old and new Bootstrap badge classes
+      const badges = card.querySelectorAll('.badge-primary, .bg-primary');
       badges.forEach(function(badge) {
         if (!badge.hasAttribute('data-filter-attached')) {
           badge.style.cursor = 'pointer';
+          badge.style.transition = 'opacity 0.2s';
           badge.setAttribute('data-filter-attached', 'true');
+          badge.addEventListener('mouseenter', function() {
+            this.style.opacity = '0.8';
+          });
+          badge.addEventListener('mouseleave', function() {
+            this.style.opacity = '1';
+          });
           badge.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();

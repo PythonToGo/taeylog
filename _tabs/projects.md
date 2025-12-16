@@ -40,13 +40,13 @@ order: 2
         {% if project.tags %}
         <div class="mb-2">
           {% for tag in project.tags %}
-            <span class="badge badge-primary mr-1" style="background-color: #007bff; color: white;">{{ tag }}</span>
+            <span class="badge bg-primary me-1" style="background-color: #007bff !important; color: white; padding: 0.35em 0.65em; border-radius: 0.25rem;">{{ tag }}</span>
           {% endfor %}
         </div>
         {% endif %}
         {% if project.badge %}
         <div class="mb-2">
-          <span class="badge badge-info" style="background-color: #17a2b8; color: white;">{{ project.badge }}</span>
+          <span class="badge bg-info" style="background-color: #17a2b8 !important; color: white; padding: 0.35em 0.65em; border-radius: 0.25rem;">{{ project.badge }}</span>
         </div>
         {% endif %}
         {% if project.period %}
