@@ -142,7 +142,6 @@
     // Make badge tags clickable for filtering
     const projectCards = document.querySelectorAll('.project-card');
     projectCards.forEach(function(card) {
-      // Select both old and new Bootstrap badge classes
       const badges = card.querySelectorAll('.badge-primary, .bg-primary');
       badges.forEach(function(badge) {
         if (!badge.hasAttribute('data-filter-attached')) {

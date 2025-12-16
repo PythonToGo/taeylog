@@ -10,17 +10,29 @@
 
 /* append your custom style below */
 
+/* Margin between about and home */
+#sidebar .nav-item:first-child {
+  margin-bottom: 1rem;
+}
+
+#sidebar .nav-item.post-toggle-item {
+  margin-bottom: 0.25rem;
+}
+
 /* Category submenu indentation */
 #sidebar .nav-item.category-sub {
   margin-left: 1.5rem;
+  margin-bottom: -0.25rem;
 }
 
+/* Category submenu link */
 #sidebar .nav-item.category-sub .nav-link {
   padding-left: 0.5rem;
   font-size: 0.9em;
   opacity: 0.9;
 }
 
+/* Category submenu link icon */
 #sidebar .nav-item.category-sub .nav-link i {
   margin-right: 0.5rem;
   font-size: 0.9em;
@@ -28,7 +40,8 @@
 
 /* Category sub-submenu (child categories) indentation */
 #sidebar .nav-item.category-sub-sub {
-  margin-left: 3rem;
+  margin-left: 0.03rem;
+  margin-bottom: -0.4rem;
 }
 
 #sidebar .nav-item.category-sub-sub .nav-link {
@@ -40,6 +53,85 @@
 #sidebar .nav-item.category-sub-sub .nav-link i {
   margin-right: 0.5rem;
   font-size: 0.9em;
+}
+
+/* Post toggle functionality */
+#sidebar .nav-item.post-toggle-item .nav-link.post-toggle-link {
+  cursor: pointer;
+  position: relative;
+}
+
+#sidebar .nav-item.post-toggle-item .nav-link.post-toggle-link .category-chevron {
+  position: absolute;
+  right: 0.5rem;
+  transition: transform 0.2s ease;
+  font-size: 0.75em;
+}
+
+#sidebar .nav-item.post-toggle-item.expanded .nav-link.post-toggle-link .category-chevron {
+  transform: rotate(90deg);
+}
+
+#sidebar .all-categories-wrapper {
+  margin: 0;
+  padding: 0;
+  margin-bottom: -0.5rem;
+}
+
+/* Reduce margin between categories wrapper and about */
+#sidebar .all-categories-wrapper ~ .nav-item:first-of-type {
+  margin-top: 0;
+}
+
+#sidebar .all-categories-container {
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.2s ease;
+  max-height: 2000px;
+  opacity: 1;
+}
+
+#sidebar .all-categories-container.collapsed {
+  max-height: 0;
+  opacity: 0;
+  display: none;
+}
+
+/* Category toggle functionality */
+#sidebar .nav-item.category-sub.has-children .nav-link.toggleable {
+  cursor: pointer;
+  position: relative;
+}
+
+#sidebar .nav-item.category-sub.has-children .nav-link.toggleable .category-chevron {
+  position: absolute;
+  right: 0.5rem;
+  transition: transform 0.2s ease;
+  font-size: 0.75em;
+}
+
+#sidebar .nav-item.category-sub.has-children.expanded .nav-link.toggleable .category-chevron {
+  transform: rotate(90deg);
+}
+
+#sidebar .nav-item.category-sub.has-children.expanded .nav-link.toggleable .category-icon {
+  color: var(--bs-primary, #0d6efd);
+}
+
+#sidebar .category-children {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+  margin-left: 0.05rem;
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.2s ease;
+  max-height: 0;
+  opacity: 0;
+}
+
+#sidebar .nav-item.category-sub.expanded .category-children {
+  max-height: 300px;
+  opacity: 1;
+  display: block !important;
 }
 
 /* Projects filter buttons */
@@ -81,9 +173,9 @@
 /* Projects badges - ensure Bootstrap 5 compatibility */
 .project-card .badge {
   display: inline-block;
-  padding: 0.35em 0.65em;
-  font-size: 0.875em;
-  font-weight: 700;
+  padding: 0.4em 0.4em;
+  font-size: 0.75em;
+  font-weight: 600;
   line-height: 1;
   text-align: center;
   white-space: nowrap;

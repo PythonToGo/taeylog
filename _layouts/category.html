@@ -5,6 +5,8 @@ layout: page
 
 {% include lang.html %}
 
+<script src="{{ '/assets/js/category-renderer.js' | relative_url }}"></script>
+
 <div id="page-category">
   <h1 class="ps-lg-2">
     <i class="far fa-folder-open fa-fw text-muted"></i>
@@ -12,34 +14,47 @@ layout: page
     <span class="lead text-muted ps-2">{{ page.posts | size }}</span>
   </h1>
 
-  {% comment %} Show subcategories if this is a parent category {% endcomment %}
-  {% assign has_subcategories = false %} {% assign subcategories = '' %} {% for
-  post in site.posts %} {% if post.categories.size > 1 and post.categories[0] ==
-  page.title %} {% assign subcat = post.categories[1] %} {% unless subcategories
-  contains subcat %} {% if subcategories == '' %} {% assign subcategories =
-  subcat %} {% else %} {% assign subcategories = subcategories | append: '|' |
-  append: subcat %} {% endif %} {% assign has_subcategories = true %} {%
-  endunless %} {% endif %} {% endfor %} {% if has_subcategories %}
-  <div class="subcategories mb-4 ps-lg-2">
+  {% comment %} Subcategories will be rendered by JavaScript {% endcomment %}
+  <div id="subcategories-container" class="subcategories mb-4 ps-lg-2" style="display: none;">
     <h3 class="h5 mb-3">
       <i class="fas fa-folder-tree fa-fw text-muted"></i>
       Subcategories
     </h3>
-    <div class="d-flex flex-wrap gap-2">
-      {% assign subcat_list = subcategories | split: '|' | sort %} {% for subcat
-      in subcat_list %} {% assign subcat_path = '/categories/' | append: subcat
-      | downcase | append: '/' %}
-      <a
-        href="{{ subcat_path | relative_url }}"
-        class="btn btn-sm btn-outline-primary"
-      >
-        <i class="fas fa-folder-open fa-fw"></i>
-        {{ subcat }}
-      </a>
-      {% endfor %}
+    <div class="d-flex flex-wrap gap-2" id="subcategories-list">
+      <!-- Subcategories will be inserted here by JavaScript -->
     </div>
   </div>
-  {% endif %}
+  
+  <!-- Subcategory data for JavaScript -->
+  <script type="application/json" id="subcategories-data">
+  {
+    "parentCategory": "{{ page.title }}",
+    "subcategories": [
+      {% assign subcategories = '' %}
+      {% for post in site.posts %}
+        {% if post.categories.size > 1 and post.categories[0] == page.title %}
+          {% assign subcat = post.categories[1] %}
+          {% unless subcategories contains subcat %}
+            {% if subcategories == '' %}
+              {% assign subcategories = subcat %}
+            {% else %}
+              {% assign subcategories = subcategories | append: '|' | append: subcat %}
+            {% endif %}
+          {% endunless %}
+        {% endif %}
+      {% endfor %}
+      {% if subcategories != '' %}
+        {% assign subcat_list = subcategories | split: '|' | sort %}
+        {% for subcat in subcat_list %}
+          {
+            "name": "{{ subcat }}",
+            "path": "/categories/{{ subcat | downcase }}/"
+          }{% unless forloop.last %},{% endunless %}
+        {% endfor %}
+      {% endif %}
+    ]
+  }
+  </script>
 
   <ul class="content ps-0">
     {% for post in page.posts %}

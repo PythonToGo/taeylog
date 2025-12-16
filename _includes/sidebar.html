@@ -18,38 +18,55 @@
 
   <nav class="flex-column flex-grow-1 w-100 ps-0">
     <ul class="nav">
-      <!-- home -->
-      <li class="nav-item{% if page.layout == 'home' %}{{ " active" }}{% endif %}">
-        <a href="{{ '/' | relative_url }}" class="nav-link">
-          <i class="fa-fw fas fa-home"></i>
-          <span>{{ site.data.locales[include.lang].tabs.home | upcase }}</span>
-        </a>
-      </li>
-      <!-- the real tabs -->
-      {% assign categories_order = 0 %}
+      <!-- about (맨 위) -->
       {% for tab in site.tabs %}
-        {% if tab.url == '/categories/' or tab.url contains 'categories' %}
-          {% assign categories_order = tab.order %}
-        {% endif %}
-        {% unless tab.parent == 'categories' %}
+        {% if tab.url == '/about/' %}
           <li class="nav-item{% if tab.url == page.url %}{{ " active" }}{% endif %}">
             <a href="{{ tab.url | relative_url }}" class="nav-link">
               <i class="fa-fw {{ tab.icon }}"></i>
-              {% capture tab_name %}{{ tab.url | split: '/' }}{% endcapture %}
-
-              <span>{{ site.data.locales[include.lang].tabs.[tab_name] | default: tab.title | upcase }}</span>
+              <span>ABOUT</span>
             </a>
           </li>
           <!-- .nav-item -->
-        {% endunless %}
+        {% endif %}
       {% endfor %}
+      
+      <!-- home (대문) -->
+      <li class="nav-item{% if page.layout == 'home' %}{{ " active" }}{% endif %}">
+        <a href="{{ '/' | relative_url }}" class="nav-link">
+          <i class="fa-fw fas fa-home"></i>
+          <span>HOME</span>
+        </a>
+      </li>
+      
+      <!-- posts (카테고리 토글) -->
+      <li class="nav-item post-toggle-item">
+        <a href="#" class="nav-link post-toggle-link">
+          <i class="fa-fw fas fa-file-alt"></i>
+          <span>POST</span>
+          {% if site.categories.size > 0 %}
+            <i class="fa-fw fas fa-chevron-right category-chevron"></i>
+          {% endif %}
+        </a>
+      </li>
 
       <!-- Dynamic categories from posts with hierarchy -->
+      <!-- Categories will be rendered by JavaScript -->
+      <li class="nav-item all-categories-wrapper" style="list-style: none; padding: 0;">
+        <div class="all-categories-container collapsed" style="display: none; max-height: 0;">
+          <ul class="nav" style="padding-left: 0;" id="categories-list">
+            <!-- Categories will be inserted here by JavaScript -->
+          </ul>
+        </div>
+      </li>
+      
+      <!-- Category data for JavaScript -->
+      <script type="application/json" id="categories-data">
       {% if site.categories.size > 0 %}
-        {% comment %} Build category hierarchy map {% endcomment %}
+      {
+        "categories": [
         {% assign parent_cats = '' %}
         {% assign child_map = '' %}
-
         {% for post in site.posts %}
           {% if post.categories.size > 0 %}
             {% assign parent_cat = post.categories[0] %}
@@ -60,7 +77,6 @@
                 {% assign parent_cats = parent_cats | append: '|' | append: parent_cat %}
               {% endif %}
             {% endunless %}
-
             {% if post.categories.size > 1 %}
               {% assign child_cat = post.categories[1] %}
               {% assign key = parent_cat | append: ':' | append: child_cat %}
@@ -74,25 +90,16 @@
             {% endif %}
           {% endif %}
         {% endfor %}
-
         {% assign sorted_parents = parent_cats | split: '|' | sort %}
         {% for parent_cat in sorted_parents %}
-          {% assign category_path = '/categories/' | append: parent_cat | downcase | append: '/' %}
-          <li class="nav-item category-sub{% if page.url == category_path %}{{ " active" }}{% endif %}">
-            <a href="{{ category_path | relative_url }}" class="nav-link">
-              <i class="fa-fw fas fa-folder"></i>
-              <span>{{ parent_cat | upcase }}</span>
-            </a>
-          </li>
-          <!-- .nav-item -->
-
-          {% comment %} Show child categories for this parent {% endcomment %}
+          {% assign has_children = false %}
+          {% assign parent_children = '' %}
           {% if child_map != '' %}
             {% assign child_entries = child_map | split: '||' %}
-            {% assign parent_children = '' %}
             {% for child_entry in child_entries %}
               {% assign parts = child_entry | split: ':' %}
               {% if parts[0] == parent_cat %}
+                {% assign has_children = true %}
                 {% assign child_cat = parts[1] %}
                 {% if parent_children == '' %}
                   {% assign parent_children = child_cat %}
@@ -101,22 +108,52 @@
                 {% endif %}
               {% endif %}
             {% endfor %}
-            {% if parent_children != '' %}
-              {% assign sorted_children = parent_children | split: '|' | sort %}
-              {% for child_cat in sorted_children %}
-                {% assign child_path = '/categories/' | append: child_cat | downcase | append: '/' %}
-                <li class="nav-item category-sub-sub{% if page.url == child_path %}{{ " active" }}{% endif %}">
-                  <a href="{{ child_path | relative_url }}" class="nav-link">
-                    <i class="fa-fw fas fa-folder-open"></i>
-                    <span>{{ child_cat | upcase }}</span>
-                  </a>
-                </li>
-                <!-- .nav-item -->
-              {% endfor %}
-            {% endif %}
           {% endif %}
+          {
+            "name": "{{ parent_cat }}",
+            "path": "/categories/{{ parent_cat | downcase }}/",
+            "children": [
+              {% if has_children %}
+                {% assign sorted_children = parent_children | split: '|' | sort %}
+                {% for child_cat in sorted_children %}
+                  {
+                    "name": "{{ child_cat }}",
+                    "path": "/categories/{{ child_cat | downcase }}/"
+                  }{% unless forloop.last %},{% endunless %}
+                {% endfor %}
+              {% endif %}
+            ]
+          }{% unless forloop.last %},{% endunless %}
         {% endfor %}
+        ],
+        "currentUrl": "{{ page.url }}"
+      }
+      {% else %}
+      {
+        "categories": [],
+        "currentUrl": "{{ page.url }}"
+      }
       {% endif %}
+      </script>
+
+      <!-- the real tabs (about 제외) -->
+      {% assign categories_order = 0 %}
+      {% for tab in site.tabs %}
+        {% if tab.url == '/categories/' or tab.url contains 'categories' %}
+          {% assign categories_order = tab.order %}
+        {% endif %}
+        {% unless tab.parent == 'categories' or tab.url == '/about/' %}
+          <li class="nav-item{% if tab.url == page.url %}{{ " active" }}{% endif %}">
+            <a href="{{ tab.url | relative_url }}" class="nav-link">
+              <i class="fa-fw {{ tab.icon }}"></i>
+              {% capture tab_name %}{{ tab.url | split: '/' }}{% endcapture %}
+
+              <span>{{ site.data.locales[include.lang].tabs.[tab_name] | default: tab.title | upcase }}</span>
+            </a>
+          </li>
+          <!-- .nav-item -->
+        {% endunless %}
+      {% endfor %}
     </ul>
   </nav>
 
@@ -183,3 +220,6 @@
   <!-- .sidebar-bottom -->
 </aside>
 <!-- #sidebar -->
+
+<script src="{{ '/assets/js/category-renderer.js' | relative_url }}"></script>
+<script src="{{ '/assets/js/category-toggle.js' | relative_url }}" defer></script>

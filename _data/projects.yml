@@ -3,14 +3,14 @@
 
 - name: Machine Intelligence and Society
   description: The project is about basic machine learning methods and fairness in machine learning associated with the Machine Intelligence and Society 2023 course
-  period: "Apr 2023 – Sep 20243"
+  period: "Apr 2023 – Sep 2023"
   badge: "Bachelor Thesis, TU Munich, Germany"
   icon: "fas fa-project-diagram"
   tags:
     - "Machine Learning/ Deep Learning"
     - "Python"
     - "Thesis"
-  # github: # Add GitHub repository URL if available
+  github: https://github.com/PythonToGo/MIuG_release
   # url: # Add project URL if available
   # image: # Add project image path if available
 
