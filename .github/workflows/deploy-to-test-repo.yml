@@ -49,10 +49,12 @@ jobs:
           # Use a Personal Access Token (PAT) with repo permissions
           # Create token at: https://github.com/settings/tokens
           # Add it as a secret named: TEST_REPO_TOKEN
-          github_token: ${{ secrets.TEST_REPO_TOKEN }}
+          # Note: Use personal_token for external repositories
+          personal_token: ${{ secrets.TEST_REPO_TOKEN }}
           publish_dir: ./_site
           # Deploy to the test repository
           external_repository: ${{ env.TEST_REPO_OWNER }}/${{ env.TEST_REPO }}
           publish_branch: main
           cname: # Optional: add custom domain if needed
+          keep_files: false
 

@@ -641,13 +641,13 @@
   function newPost() {
     if (!editor) return;
     if (editor.value && editor.value.trim() && editor.value !== lastSavedContent) {
-      if (
-        !confirm(
+    if (
+      !confirm(
           'Do you want to start a new post? The current content will be saved automatically.'
-        )
-      ) {
-        return;
-      }
+      )
+    ) {
+      return;
+    }
       saveDraft();
     }
     
@@ -798,8 +798,8 @@
       if (pathInput) pathInput.value = path;
       if (titleInput && data.title) titleInput.value = data.title;
       
-      updatePreview();
-      updateStats();
+    updatePreview();
+    updateStats();
       updateSaveStatus('success', 'Post loaded successfully');
       clearDraft();
       
@@ -822,8 +822,8 @@
     if (!path) {
       updatePostPath();
       path = pathInput?.value?.trim();
-    }
-    
+  }
+
     if (!path) {
       alert('Please select a category and enter a post title.');
       return;
@@ -1024,7 +1024,7 @@
         }
       } catch (error) {
         console.warn('Local API not available, trying GitHub API...', error);
-      }
+  }
     }
     
     // Fallback to GitHub API or local posts
