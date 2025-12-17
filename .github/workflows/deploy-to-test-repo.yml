@@ -1,0 +1,58 @@
+name: "Deploy Editor Branch to Test Repository"
+on:
+  push:
+    branches:
+      - editor
+    paths-ignore:
+      - .gitignore
+      - README.md
+      - LICENSE
+
+  workflow_dispatch:
+
+# This workflow deploys editor branch to a separate test repository
+# Repository name: PythonToGo.github.io-editor (change if needed)
+# URL: https://pythontogo.github.io-editor (or your custom domain)
+
+permissions:
+  contents: write
+
+env:
+  TEST_REPO: PythonToGo.github.io-editor
+  TEST_REPO_OWNER: PythonToGo
+
+jobs:
+  deploy-to-test-repo:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout editor branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: editor
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.3
+          bundler-cache: true
+
+      - name: Build Jekyll site
+        run: bundle exec jekyll build -d _site
+        env:
+          JEKYLL_ENV: "production"
+
+      - name: Deploy to test repository
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          # Use a Personal Access Token (PAT) with repo permissions
+          # Create token at: https://github.com/settings/tokens
+          # Add it as a secret named: TEST_REPO_TOKEN
+          github_token: ${{ secrets.TEST_REPO_TOKEN }}
+          publish_dir: ./_site
+          # Deploy to the test repository
+          external_repository: ${{ env.TEST_REPO_OWNER }}/${{ env.TEST_REPO }}
+          publish_branch: main
+          cname: # Optional: add custom domain if needed
+
