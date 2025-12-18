@@ -16,6 +16,8 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 env:
   TEST_REPO: PythonToGo.github.io-editor
@@ -24,7 +26,7 @@ env:
 jobs:
   deploy-to-test-repo:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout editor branch
         uses: actions/checkout@v4
@@ -46,15 +48,18 @@ jobs:
       - name: Deploy to test repository
         uses: peaceiris/actions-gh-pages@v3
         with:
-          # Use a Personal Access Token (PAT) with repo permissions
-          # Create token at: https://github.com/settings/tokens
-          # Add it as a secret named: TEST_REPO_TOKEN
-          # Note: Use personal_token for external repositories
+          # For external repository deployment, you need a Personal Access Token (PAT)
+          # 1. Create a PAT at: https://github.com/settings/tokens
+          #    - Select "repo" scope (full control of private repositories)
+          # 2. Add it as a secret in this repository:
+          #    - Go to Settings > Secrets and variables > Actions
+          #    - Click "New repository secret"
+          #    - Name: TEST_REPO_TOKEN
+          #    - Value: (paste your PAT)
           personal_token: ${{ secrets.TEST_REPO_TOKEN }}
           publish_dir: ./_site
-          # Deploy to the test repository
+          # Deploy to the external test repository
           external_repository: ${{ env.TEST_REPO_OWNER }}/${{ env.TEST_REPO }}
           publish_branch: main
           cname: # Optional: add custom domain if needed
           keep_files: false
-
