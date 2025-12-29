@@ -438,6 +438,13 @@ h1.page-title {
   <span class="badge badge-warning" style="background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%); color: white; padding: 0.35rem 0.75rem; border-radius: 0.5rem; font-size: 0.85rem; font-weight: 500;">Intermediate</span>
 </div>
 
+<div style="background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%); border-radius: 0.75rem; padding: 1rem 1.5rem; flex: 1 1 200px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); text-align: center; border: 1px solid rgba(0,0,0,0.05);">
+  <div style="font-size: 2rem; margin-bottom: 0.5rem;">🇬🇷</div>
+  <div style="font-weight: 600; color: #2d3748; margin-bottom: 0.5rem;">Greek</div>
+  <span class="badge badge-warning" style="background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%); color: white; padding: 0.35rem 0.75rem; border-radius: 0.5rem; font-size: 0.85rem; font-weight: 500;">Basic</span>
+</div>
+
+
 </div>
 
 </div>

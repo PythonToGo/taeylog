@@ -211,6 +211,7 @@ exclude:
   - purgecss.js
   - "*.config.js"
   - "package*.json"
+  - "assets/img/favicons/site.webmanifest"
 
 jekyll-archives:
   enabled: [categories, tags]
