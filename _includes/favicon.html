@@ -1,4 +1,10 @@
-<!-- Favicon for Safari and Firefox -->
+<!-- Enhanced Favicon Support for Safari and Firefox -->
+<!-- Order matters: favicon.ico first, then PNG, then SVG -->
+<link
+  rel="shortcut icon"
+  type="image/x-icon"
+  href="{{ '/favicon.ico' | relative_url }}"
+/>
 <link
   rel="icon"
   type="image/x-icon"
@@ -26,11 +32,6 @@
   rel="icon"
   type="image/svg+xml"
   href="{{ '/assets/img/favicons/favicon.svg' | relative_url }}"
-/>
-<link
-  rel="shortcut icon"
-  type="image/x-icon"
-  href="{{ '/favicon.ico' | relative_url }}"
 />
 <link
   rel="apple-touch-icon"
