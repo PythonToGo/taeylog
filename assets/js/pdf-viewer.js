@@ -34,10 +34,21 @@
   }
 
   // Render a single page of PDF
-  async function renderPage(pdf, pageNumber, container) {
+  async function renderPage(pdf, pageNumber, container, isPreview = false) {
     try {
       const page = await pdf.getPage(pageNumber);
-      const viewport = page.getViewport({ scale: 1.5 });
+
+      // For preview images, calculate scale based on container size
+      let scale = 1.5;
+      if (isPreview) {
+        const containerWidth =
+          container.clientWidth || container.parentElement?.clientWidth || 1200;
+        const viewport = page.getViewport({ scale: 1.0 });
+        // Calculate scale to fit container width while maintaining aspect ratio
+        scale = Math.min(containerWidth / viewport.width, 2.0);
+      }
+
+      const viewport = page.getViewport({ scale: scale });
 
       const canvas = document.createElement('canvas');
       const context = canvas.getContext('2d');
@@ -53,11 +64,13 @@
 
       await page.render(renderContext).promise;
 
-      // Add page number label
-      const pageLabel = document.createElement('div');
-      pageLabel.className = 'pdf-page-label';
-      pageLabel.textContent = `Page ${pageNumber}`;
-      container.appendChild(pageLabel);
+      // Add page number label (hidden for preview)
+      if (!isPreview) {
+        const pageLabel = document.createElement('div');
+        pageLabel.className = 'pdf-page-label';
+        pageLabel.textContent = `Page ${pageNumber}`;
+        container.appendChild(pageLabel);
+      }
 
       return canvas;
     } catch (error) {
@@ -72,6 +85,9 @@
   // Render all pages of a PDF, or specific pages if data-page is specified
   async function renderPdf(pdfUrl, container) {
     if (!container) return;
+
+    // Check if this is a preview image (single page display)
+    const isPreview = container.classList.contains('preview-img');
 
     // Show loading state
     container.innerHTML = '<div class="pdf-loading">Loading PDF...</div>';
@@ -108,11 +124,17 @@
           'Parsed:',
           pagesToRender,
           'Total pages:',
-          pdf.numPages
+          pdf.numPages,
+          'Is preview:',
+          isPreview
         );
       } else {
-        // Render all pages if no specific page is requested
-        pagesToRender = Array.from({ length: pdf.numPages }, (_, i) => i + 1);
+        // For preview, default to page 1; otherwise render all pages
+        if (isPreview) {
+          pagesToRender = [1];
+        } else {
+          pagesToRender = Array.from({ length: pdf.numPages }, (_, i) => i + 1);
+        }
       }
 
       if (pagesToRender.length === 0) {
@@ -122,25 +144,33 @@
         return;
       }
 
-      // Create wrapper for all pages
-      const pagesWrapper = document.createElement('div');
-      pagesWrapper.className = 'pdf-pages-wrapper';
-      container.appendChild(pagesWrapper);
-
-      // Render specified pages
-      for (const pageNum of pagesToRender) {
+      // For preview images, render directly to container without wrapper
+      if (isPreview && pagesToRender.length === 1) {
         const pageContainer = document.createElement('div');
         pageContainer.className = 'pdf-page-container';
-        pagesWrapper.appendChild(pageContainer);
-        await renderPage(pdf, pageNum, pageContainer);
-      }
+        container.appendChild(pageContainer);
+        await renderPage(pdf, pagesToRender[0], pageContainer, true);
+      } else {
+        // Create wrapper for all pages (normal multi-page display)
+        const pagesWrapper = document.createElement('div');
+        pagesWrapper.className = 'pdf-pages-wrapper';
+        container.appendChild(pagesWrapper);
 
-      // Add PDF info only if rendering all pages
-      if (!pageAttr) {
-        const infoDiv = document.createElement('div');
-        infoDiv.className = 'pdf-info';
-        infoDiv.textContent = `Total pages: ${pdf.numPages}`;
-        container.appendChild(infoDiv);
+        // Render specified pages
+        for (const pageNum of pagesToRender) {
+          const pageContainer = document.createElement('div');
+          pageContainer.className = 'pdf-page-container';
+          pagesWrapper.appendChild(pageContainer);
+          await renderPage(pdf, pageNum, pageContainer, false);
+        }
+
+        // Add PDF info only if rendering all pages
+        if (!pageAttr) {
+          const infoDiv = document.createElement('div');
+          infoDiv.className = 'pdf-info';
+          infoDiv.textContent = `Total pages: ${pdf.numPages}`;
+          container.appendChild(infoDiv);
+        }
       }
     } catch (error) {
       console.error('Error loading PDF:', error);
