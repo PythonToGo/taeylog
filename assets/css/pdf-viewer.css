@@ -7,6 +7,32 @@
   border: 1px solid var(--bs-border-color, #dee2e6);
 }
 
+/* PDF Viewer as preview image */
+.pdf-viewer-container.preview-img {
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+}
+
+.pdf-viewer-container.preview-img .pdf-page-container {
+  margin: 0;
+  padding: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+.pdf-viewer-container.preview-img canvas {
+  width: 100%;
+  height: auto;
+  border: none;
+  border-radius: 0.25rem;
+}
+
+.pdf-viewer-container.preview-img .pdf-page-label {
+  display: none;
+}
+
 .pdf-pages-wrapper {
   display: flex;
   flex-direction: column;

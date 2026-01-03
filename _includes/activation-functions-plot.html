@@ -1,0 +1,166 @@
+<div style="width: 100%; max-width: 1200px; margin: 20px auto">
+  <canvas
+    id="activation-functions-canvas"
+    width="1200"
+    height="800"
+    style="
+      width: 100%;
+      height: auto;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    "
+  ></canvas>
+</div>
+
+<script>
+  (function () {
+    const canvas = document.getElementById("activation-functions-canvas");
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    const width = canvas.width;
+    const height = canvas.height;
+    const padding = 40;
+    const verticalSpacing = 80;
+    const plotWidth = (width - 4 * padding) / 3;
+    const plotHeight = (height - 3 * padding - verticalSpacing) / 2;
+
+    // Helper function to draw a single plot
+    function drawPlot(
+      x,
+      y,
+      title,
+      formula,
+      func,
+      yMin,
+      yMax,
+      xLabel = "x",
+      yLabel = "y"
+    ) {
+      const plotX = x * (plotWidth + padding) + padding;
+      const extraSpacing = y === 1 ? verticalSpacing : 0;
+      const plotY = y * (plotHeight + padding) + padding + 30 + extraSpacing;
+
+      // Title
+      ctx.fillStyle = "#000";
+      ctx.font = "bold 25px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText(title, plotX + plotWidth / 2, plotY - 25);
+
+      // Formula
+      ctx.font = "bold 20px Arial";
+      ctx.fillText(formula, plotX + plotWidth / 2, plotY - 5);
+
+      // Draw axes
+      const axisX = plotX;
+      const axisY = plotY + plotHeight;
+      const graphWidth = plotWidth - 20;
+      const graphHeight = plotHeight - 40;
+
+      ctx.strokeStyle = "#333";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(axisX, axisY);
+      ctx.lineTo(axisX + graphWidth, axisY);
+      ctx.moveTo(axisX, axisY);
+      ctx.lineTo(axisX, axisY - graphHeight);
+      ctx.stroke();
+
+      // Draw grid
+      ctx.strokeStyle = "#ccc";
+      ctx.lineWidth = 0.5;
+      for (let i = 0; i <= 5; i++) {
+        const xPos = axisX + (i / 5) * graphWidth;
+        ctx.beginPath();
+        ctx.moveTo(xPos, axisY);
+        ctx.lineTo(xPos, axisY - graphHeight);
+        ctx.stroke();
+      }
+      for (let i = 0; i <= 5; i++) {
+        const yPos = axisY - (i / 5) * graphHeight;
+        ctx.beginPath();
+        ctx.moveTo(axisX, yPos);
+        ctx.lineTo(axisX + graphWidth, yPos);
+        ctx.stroke();
+      }
+
+      // Draw function
+      ctx.strokeStyle = "#0066cc";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+
+      const xMin = -5;
+      const xMax = 5;
+      const xRange = xMax - xMin;
+      const yRange = yMax - yMin;
+
+      for (let i = 0; i <= graphWidth; i++) {
+        const xVal = xMin + (i / graphWidth) * xRange;
+        const yVal = func(xVal);
+        const xPos = axisX + i;
+        const yPos = axisY - ((yVal - yMin) / yRange) * graphHeight;
+
+        if (i === 0) {
+          ctx.moveTo(xPos, yPos);
+        } else {
+          ctx.lineTo(xPos, yPos);
+        }
+      }
+      ctx.stroke();
+
+      // Labels
+      ctx.fillStyle = "#666";
+      ctx.font = "10px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText(xLabel, plotX + plotWidth / 2, axisY + 20);
+      ctx.textAlign = "right";
+      ctx.fillText(yLabel, axisX - 5, plotY + plotHeight / 2);
+
+      // Axis labels
+      ctx.textAlign = "center";
+      ctx.fillText("-5", axisX, axisY + 15);
+      ctx.fillText("5", axisX + graphWidth, axisY + 15);
+      ctx.textAlign = "right";
+      ctx.fillText(yMin.toFixed(1), axisX - 5, axisY + 5);
+      ctx.fillText(yMax.toFixed(1), axisX - 5, axisY - graphHeight + 5);
+    }
+
+    // Clear canvas
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, width, height);
+
+    // Main title
+    ctx.fillStyle = "#000";
+    ctx.font = "bold 18px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText("Activation Functions", width / 2, 15);
+
+    // Define functions
+    function sigmoid(x) {
+      return 1 / (1 + Math.exp(-x));
+    }
+    function tanh(x) {
+      return Math.tanh(x);
+    }
+    function relu(x) {
+      return Math.max(0, x);
+    }
+    function leakyRelu(x) {
+      return Math.max(0.1 * x, x);
+    }
+    function elu(x) {
+      return x >= 0 ? x : 1.0 * (Math.exp(x) - 1);
+    }
+    function swish(x) {
+      return x * sigmoid(x);
+    }
+
+    // Draw all plots
+    drawPlot(0, 0, "Sigmoid", "σ(x) = 1 / (1 + e^(-x))", sigmoid, 0, 1);
+    drawPlot(1, 0, "tanh", "tanh(x)", tanh, -1, 1);
+    drawPlot(2, 0, "ReLU", "max(0, x)", relu, -0.5, 5);
+    drawPlot(0, 1, "Leaky ReLU", "max(0.1x, x)", leakyRelu, -1, 5);
+    drawPlot(1, 1, "ELU", "x if x≥0, α(e^x-1) if x<0", elu, -1.5, 5);
+    drawPlot(2, 1, "Swish", "x · σ(x)", swish, -0.5, 5);
+  })();
+</script>
