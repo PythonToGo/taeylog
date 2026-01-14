@@ -84,3 +84,14 @@ Logic 을 이해하기 위해서는 구문(Syntax), 의미론(Semantics), 모델
 
 ## Inference Methods
 
+**Knowledge Base** 로 부터 Sentence $$\alpha$$ 가 도출되는지 ($$KB \models \alpha $$) 확인하는 방법들이다. 
+
+
+### Inference by Enumeration
+
+모든 가능한 모델을 나열해서 $$KB$$ 가 true 인 모든 경우에 $$\alpha$$ 도 true 인지 확인한다. Big O is $$O(2_n)$$.
+
+
+### Theorem Proving
+
+모델을 생성하기 않고, Inference Rules를 직접 적용한다. 
