@@ -11,7 +11,7 @@ mermaid: true
 comments: true
 image: 
 #     # type: pdf
-    path: assets/img/posts/study-ai/ch6-front.png
+    path: assets/img/posts/study-ai/ch7-re-proof.png
 
 #     # page: 7
 #     alt: 
