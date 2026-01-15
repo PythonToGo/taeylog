@@ -4,7 +4,7 @@ description: Summary of Logical Agents
 date: 2026-01-12 05:00:00
 categories: [Study, Fundamentals of Artificial Intelligence ]
 author: PythonToGo
-tags: [Fundamentals of Artificial Intelligence, Constraint Satisfaction Problem, Backtracking, Heuristics, Minium Remaining Values, Least Constraining Value, Arc Consistency, ]
+tags: [Fundamentals of Artificial Intelligence, Logical Agents, Horn Clause, Knowlege Base (KB), CNF, ]
 # pin: true
 math: true
 mermaid: true
