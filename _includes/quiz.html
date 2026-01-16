@@ -1,0 +1,12 @@
+{%- assign _title = include.title | default: 'Quiz' -%} {%- assign _items =
+include.items | default: page.quiz_items -%}
+
+<div class="quiz-widget" data-quiz-title="{{ _title | xml_escape }}">
+  <script type="application/json" data-quiz-data>
+    {%- if include.json -%}
+      {{ include.json }}
+    {%- else -%}
+      {{ _items | jsonify }}
+    {%- endif -%}
+  </script>
+</div>
