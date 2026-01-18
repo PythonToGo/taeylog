@@ -142,9 +142,9 @@ $$
 
 파라미터 $$k$$ 의 값에 따라, 시스템은 **Nonlinear continuous oscillation ($$k=0$$), Unstable movement ($$k <0$$), or Convergence to EP ($$k >0$$)** 등의 형태를 가진다. 
 
-<div class="pdf-viewer-container" data-pdf="/assets/img/posts/study-ds/ch10.pdf" data-page="11"></div>
+<div class="pdf-viewer-container" data-pdf="/assets/img/posts/study-ds/ch10.pdf" data-page="10"></div>
 
-<div class="pdf-viewer-container" data-pdf="/assets/img/posts/study-ds/ch10.pdf" data-page="12"></div>
+<div class="pdf-viewer-container" data-pdf="/assets/img/posts/study-ds/ch10.pdf" data-page="11"></div>
 
 
 ## Continuous Approximation
