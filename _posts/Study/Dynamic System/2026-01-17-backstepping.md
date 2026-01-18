@@ -12,7 +12,7 @@ comments: true
 image: 
 #     # type: pdf
     path: assets/img/posts/study-ds/ch9-front.png
-
+# <div class="pdf-viewer-container" data-pdf="/assets/img/posts/study-ds/ch9.pdf" data-page="3"></div>
 #     # page: 7
 #     alt: 
 ---
