@@ -5,7 +5,7 @@ date: 2026-01-28 09:00:00
 categories: [Study, Machine Learning]
 author: PythonToGo
 tags: [Machine Learning,Clustering, Unsupervised Learning, Expectation Maximization Algorithm]
-pin: true
+# pin: true
 math: true
 mermaid: true
 comments: true
@@ -174,7 +174,7 @@ binary data(e.g., 흑백이미지) 를 모델링할 대 사용하고, M-step 을
 데이터를 계층적으로 쌓아가는 방식
 
 - **Agglomerative** : Botton-up 방식으로 클러스터 쌍을 병합
-- **Linkage criteria** : 클러스터 간의 거리를 정의하는 기준 (single, complete, average, centroid 등) 에 따라 병하 대상이 결정됨
+- **Linkage criteria** : 클러스터 간의 거리를 정의하는 기준 (single, complete, average, centroid 등) 에 따라 병합 대상이 결정됨
 
 
 ## 결론
